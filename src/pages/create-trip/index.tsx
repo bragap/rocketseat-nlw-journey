@@ -21,10 +21,6 @@ export function CreateTripPage() {
   const [ownerName, setOwnerName] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [eventStartAndEndDates, setEventStartAndEndDates] = useState<DateRange | undefined>();
-
-
-
-
   const [isConfirmTripModalOpen, setIsconfirmTripModalOpen] = useState(false);
 
 

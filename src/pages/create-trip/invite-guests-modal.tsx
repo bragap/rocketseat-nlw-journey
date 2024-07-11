@@ -42,8 +42,6 @@ export function InviteGuestsModal({
                             </div>
                         )
                     })}
-
-
                 </div>
 
                 <div className="w-full h-px bg-zinc-800" />

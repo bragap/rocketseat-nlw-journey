@@ -3,6 +3,7 @@ import { Button } from "../../components/button";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { api } from "../../lib/axios";
+import { ManageGuestsModal } from "./manage-guests-modal";
 
 interface Participant {
     id: string
@@ -21,6 +22,17 @@ export function Guests() {
         api.get(`/trips/${tripId}/participants`).then(response => setParticipants(response.data.participants))
     }, [tripId])
 
+
+    const [modalManageGuests, setModalManageGuests] = useState(false);
+
+    function openModalManageGuests() {
+        return setModalManageGuests(true);
+    }
+
+    function closeModalManageGuests() {
+        return setModalManageGuests(false);
+    }
+
     return (
         <div className="space-y-6 ">
             <h2 className="font-semibold text-xl">Convidados</h2>
@@ -33,18 +45,26 @@ export function Guests() {
                                 <span className="block font-medium text-sm text-zinc-400 truncate">{participant.email}</span>
                             </div>
                             {participant.is_confirmed ? (
-                                <CheckCircle2 className="text-green-400 size-5 shrink-0" />
+                                    <CheckCircle2 className="text-lime-300 size-5 shrink-0" />
                             ) : (
-                                <CircleDashed className="text-zinc-400 size-5 shrink-0" />
+                                    <CircleDashed className="text-zinc-400 size-5 shrink-0" />
+                               
                             )}
                         </div>
                     )
                 })}
 
             </div>
-            <Button variant="secondary" size="full">
+            <Button onClick={openModalManageGuests} variant="secondary" size="full">
                 <UserCog className="size-5" /> Gerenciar convidados
             </Button>
+
+            {modalManageGuests && (
+                <ManageGuestsModal
+                    participants={participants}
+                    closeModalManageGuests={closeModalManageGuests}
+                />
+            )}
         </div>
     )
 }
