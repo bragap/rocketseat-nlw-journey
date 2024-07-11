@@ -9,3 +9,16 @@
 input {
     color-scheme: dark;
 }
+
+body::-webkit-scrollbar {
+    width: 8px;               
+  }
+  
+  body::-webkit-scrollbar-track {
+    color-scheme: dark;    
+  }
+  
+  body::-webkit-scrollbar-thumb {
+    background-color: #BEF264;   
+    border-radius: 20px;       
+  }

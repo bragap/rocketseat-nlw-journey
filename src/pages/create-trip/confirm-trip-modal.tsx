@@ -1,15 +1,19 @@
-import { User, X } from "lucide-react"
+import { Mail, User, X } from "lucide-react"
 import { FormEvent } from "react"
 import { Button } from "../../components/button"
 
 interface ConfirmTripModalProps {
     closeConfirmTripModal: () => void
     createTrip: (event: FormEvent<HTMLFormElement>) => void
+    setOwnerName: (name: string) => void
+    setOwnerEmail: (email: string) => void
 }
 
 export function ConfirmTripModal({
     closeConfirmTripModal,
-    createTrip
+    createTrip,
+    setOwnerEmail,
+    setOwnerName
 }: ConfirmTripModalProps) {
 
 
@@ -37,15 +41,21 @@ export function ConfirmTripModal({
                         <input
                             type="text"
                             name="name"
-                            placeholder="Seu nome completo" className="bg-transparent text-lg placehold-zinc-400 w-full outline-none" />
+                            placeholder="Seu nome completo" 
+                            className="bg-transparent text-lg placehold-zinc-400 w-full outline-none" 
+                            onChange={e => setOwnerName(e.target.value)}
+                            />
                     </div>
 
                     <div className='h-14 px-5 bg-zinc-950 border-zinc-800 rounded-lg flex items-center gap-2'>
-                        <User className="text-zinc-400 size-5" />
+                        <Mail className="text-zinc-400 size-5" />
                         <input
                             type="email"
                             name="email"
-                            placeholder="Seu e-mail pessoal" className=" bg-transparent text-lg placehold-zinc-400 w-full outline-none flex-1" />
+                            placeholder="Seu e-mail pessoal" 
+                            className=" bg-transparent text-lg placehold-zinc-400 w-full outline-none flex-1" 
+                            onChange={e => setOwnerEmail(e.target.value)}
+                            />
                     </div>
 
                     <Button type="submit" variant="primary" size="full">
