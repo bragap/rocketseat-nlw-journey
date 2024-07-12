@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { InviteGuestsModal } from './invite-guests-modal';
 import { ConfirmTripModal } from './confirm-trip-modal';
@@ -6,6 +6,7 @@ import { DestinationAndDateStep } from './steps/destination-and-date-step';
 import { InviteGuestsStep } from './steps/invite-guests-step';
 import { DateRange } from 'react-day-picker';
 import { api } from '../../lib/axios';
+import { Loader } from '../../components/loader';
 
 export function CreateTripPage() {
 
@@ -22,6 +23,11 @@ export function CreateTripPage() {
   const [ownerEmail, setOwnerEmail] = useState("");
   const [eventStartAndEndDates, setEventStartAndEndDates] = useState<DateRange | undefined>();
   const [isConfirmTripModalOpen, setIsconfirmTripModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(false)
+  const [tripAlreadyExists, setTripAlreadyExists] = useState(false);
+  const [noEmailAdd, setNoEmailAdd] = useState(false);
+  const [emailAlreadyAdd, setEmailAlreadyAdd] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
 
   function openGuestsInput() {
@@ -54,14 +60,21 @@ export function CreateTripPage() {
     const email = data.get('email')?.toString()
 
 
-    if (!email) {
-      return
-    }
 
-    if (emailsToInvite.includes(email)) {
+    if (!email) {
+      setEmailAlreadyAdd(false);
+      setNoEmailAdd(true);
       return;
     }
 
+    if (emailsToInvite.includes(email)) {
+      setNoEmailAdd(false);
+      setEmailAlreadyAdd(true);
+      return;
+    }
+
+    setNoEmailAdd(false);
+    setEmailAlreadyAdd(false);
     setEmailsToInvite([...emailsToInvite, email]);
 
 
@@ -76,20 +89,43 @@ export function CreateTripPage() {
   async function createTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!destination || !ownerName || !ownerEmail || !eventStartAndEndDates) {
+      setErrorMessage(true);
+      return;
+    }
 
-    const response = await api.post('/trips', {
-      destination,
-      starts_at: eventStartAndEndDates?.from,
-      ends_at: eventStartAndEndDates?.to,
-      emails_to_invite: emailsToInvite,
-      owner_name: ownerName,
-      owner_email: ownerEmail
-    })
 
+    setErrorMessage(false);
+
+    try {
+
+      setTripAlreadyExists(false);
+      setIsLoading(true);
+
+      const response = await api.post('/trips', {
+        destination,
+        starts_at: eventStartAndEndDates?.from,
+        ends_at: eventStartAndEndDates?.to,
+        emails_to_invite: emailsToInvite,
+        owner_name: ownerName,
+        owner_email: ownerEmail
+      })
 
       const { tripId } = response.data;
 
-    navigate(`/trips/${tripId}`)
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate(`/trips/${tripId}`)
+      }, 2000);
+
+    }
+    catch {
+      // pegar o status de erro 400
+      if (400) {
+        setTripAlreadyExists(true)
+        return;
+      }
+    }
   }
 
   return (
@@ -133,6 +169,8 @@ export function CreateTripPage() {
           addNewEmailToInvite={addNewEmailToInvite}
           closeGuestsModal={closeGuestsModal}
           removeEmailFromInvites={removeEmailFromInvites}
+          emailAlreadyAdd={emailAlreadyAdd}
+          noEmailAdd={noEmailAdd}
         />
       )}
 
@@ -143,9 +181,16 @@ export function CreateTripPage() {
           createTrip={createTrip}
           setOwnerName={setOwnerName}
           setOwnerEmail={setOwnerEmail}
+          destination={destination}
+          eventStartAndEndDates={eventStartAndEndDates}
+          errorMessage={errorMessage}
+          tripAlreadyExists={tripAlreadyExists}
         />
 
       )}
+
+
+      {isLoading && <Loader />}
     </div>
 
 

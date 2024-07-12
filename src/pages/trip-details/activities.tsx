@@ -25,6 +25,7 @@ export function Activities() {
             .then(response => setActivities(response.data.activities))
     }, [tripId])
 
+    
     return (
         <div className="space-y-8">
 

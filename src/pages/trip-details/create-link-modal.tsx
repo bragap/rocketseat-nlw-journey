@@ -1,37 +1,68 @@
-import {  Link2, Tag, X } from "lucide-react";
+import { Link2, Tag, X } from "lucide-react";
 import { Button } from "../../components/button";
 import { useParams } from "react-router-dom";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { api } from "../../lib/axios";
+import { Loader } from "../../components/loader";
 
-interface CreateLinkModalProps{
-closeModalAddLink: () => void
+interface CreateLinkModalProps {
+    closeModalAddLink: () => void
 }
 
 export function CreateLinkModal({
     closeModalAddLink
-}: CreateLinkModalProps){
+}: CreateLinkModalProps) {
 
-    const {tripId} = useParams();
+    const { tripId } = useParams();
+    const [noNameOrLink, setNoNameOrLink] = useState(false);
+    const [alreadyExistsLink, setAlreadyExistsLink] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
 
 
-    async function createLink(event: FormEvent<HTMLFormElement>){
+
+    async function createLink(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         const data = new FormData(event.currentTarget);
         const title = data.get('title')?.toString();
         const url = data.get('url')?.toString();
 
-       await api.post(`/trips/${tripId}/links`,{
-            title,
-            url
-        })
+        if (!title || !url) {
+            setNoNameOrLink(true);
+            return;
+        }
 
-        window.document.location.reload();
+        try {
+            setIsLoading(true);
+            const response = await api.post(`/trips/${tripId}/links`, {
+                title,
+                url
+            })
+            setTimeout(() => {
+                setIsLoading(false);
+                window.document.location.reload();
+            },500)
+
+            if (response.status === 400) {
+                setAlreadyExistsLink(true);
+                setTimeout(() => {
+                    setIsLoading(false);
+                    
+                },500)
+            }
+
+        }
+        catch {
+            setAlreadyExistsLink(true);
+            setTimeout(() => {
+                setIsLoading(false);
+            },500)
+            return;
+        }
     }
 
 
-    return(
+    return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
             <div className="w-[800px] rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
 
@@ -68,6 +99,8 @@ export function CreateLinkModal({
                     </div>
 
 
+                    {noNameOrLink && <p className="text-red-500">Preencha todos os campos</p>}
+                    {alreadyExistsLink && <p className="text-red-500">Esse link já existe</p>}
 
                     <Button variant="primary" size="full">
                         Adicionar link
@@ -75,6 +108,8 @@ export function CreateLinkModal({
 
                 </form>
             </div>
+
+            {isLoading && <Loader/>}
         </div>
     )
 }

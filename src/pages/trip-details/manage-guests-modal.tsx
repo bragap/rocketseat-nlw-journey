@@ -21,7 +21,8 @@ export function ManageGuestsModal({
 }: ManageGuestsModalProps) {
 
     const { tripId } = useParams();
-
+    const [noEmail, setNoEmail] = useState(false);
+    const [alreadyExistsEmail, setAlreadyExistsEmail] = useState(false);
 
 
     async function confirmGuest(e: React.MouseEvent<HTMLButtonElement>) {
@@ -41,10 +42,12 @@ export function ManageGuestsModal({
         const email = data.get('email')?.toString()
 
         if (!email) {
-            return
+            setNoEmail(true);
+            return;
         }
 
         if (participants.find(participant => participant.email === email)) {
+            setAlreadyExistsEmail(true);
             return;
         }
 
@@ -72,7 +75,7 @@ export function ManageGuestsModal({
                     <p className="text-sm text-zinc-400">Selecione os participantes a serem confirmados</p>
 
                 </div>
-                {/* <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                     {participants.map(participant => {
                         return (
                             <button onClick={confirmGuest} key={participant.id} id={participant.id} className="py-1.5 px-2.5 rounded-md bg-zinc-800 flex items-center gap-2 hover:bg-zinc-500">
@@ -86,7 +89,7 @@ export function ManageGuestsModal({
                             </button>
                         )
                     })}
-                </div> */}
+                </div>
 
                 <div className="w-full h-px bg-zinc-800" />
 
@@ -104,6 +107,8 @@ export function ManageGuestsModal({
                     })}
                 </div>
 
+                    {noEmail && (<p className="text-sm text-red-500">Digite um e-mail válido</p>)}
+                    {alreadyExistsEmail && (<p className="text-sm text-red-500">Este e-mail já foi convidado</p>)}
                 <form onSubmit={inviteNewGuest} className="p-2.5 bg-zinc-950 border-zinc-800 rounded-lg flex items-center ">
                     <div className='px-2 flex items-center flex-1 gap-2'>
                         <AtSign className="text-zinc-400 size-5" />

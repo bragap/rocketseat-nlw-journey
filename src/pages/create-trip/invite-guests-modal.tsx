@@ -7,13 +7,17 @@ interface InviteGuestsModalProps {
     emailsToInvite: string[]
     addNewEmailToInvite: (event: FormEvent<HTMLFormElement>) => void
     removeEmailFromInvites: (email: string) => void
+    emailAlreadyAdd: boolean
+    noEmailAdd: boolean
 }
 
 export function InviteGuestsModal({
     addNewEmailToInvite,
     closeGuestsModal,
     emailsToInvite,
-    removeEmailFromInvites
+    removeEmailFromInvites,
+    emailAlreadyAdd,
+    noEmailAdd
 }: InviteGuestsModalProps) {
 
     return (
@@ -46,6 +50,8 @@ export function InviteGuestsModal({
 
                 <div className="w-full h-px bg-zinc-800" />
 
+                {emailAlreadyAdd && <p className="text-sm font-semibold text-red-500">Esse e-mail já foi adicionado</p>}
+                {noEmailAdd && <p className="text-sm font-semibold text-red-500">Digite um e-mail válido</p>}
                 <form onSubmit={addNewEmailToInvite} className="p-2.5 bg-zinc-950 border-zinc-800 rounded-lg flex items-center gap-2">
                     <div className='px-2 flex items-center flex-1 gap-2'>
                         <AtSign className="text-zinc-400 size-5" />

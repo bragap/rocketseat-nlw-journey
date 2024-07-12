@@ -15,8 +15,11 @@ export function ChangeLocalAndDate({
 }: ChangeLocalAndDateProps) {
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [eventStartAndEndDates, setEventStartAndEndDates] = useState<DateRange | undefined>();
-    const {tripId} = useParams();
-
+    const { tripId } = useParams();
+    const [noParams, setNoParams] = useState(false);
+    const [alreadyExistsTrip, setAlreadyExistsTrip] = useState(false);
+    const [errorInRequest, setErrorInRequest] = useState(false);
+   
 
 
     function openDatePicker() {
@@ -38,14 +41,34 @@ export function ChangeLocalAndDate({
         const starts_at = eventStartAndEndDates?.from;
         const ends_at = eventStartAndEndDates?.to;
 
-      const response = await api.put(`/trips/${tripId}`, {
-            destination,
-            starts_at,
-            ends_at
+        if (!destination || !starts_at || !ends_at) {
+            setNoParams(true);
+            return;
         }
-        )
-        console.log(response.data)
+
         
+        try{
+            const response = await api.put(`/trips/${tripId}`, {
+                destination,
+                starts_at,
+                ends_at
+            })
+            
+            if(response.status === 400){
+                setAlreadyExistsTrip(true);
+                return;
+            }
+        }
+        catch{
+            setErrorInRequest(true);
+            console.log("erro")
+            return;
+        }
+        
+        
+        setNoParams(false);
+        setAlreadyExistsTrip(false);
+        setErrorInRequest(false);
 
     }
 
@@ -85,15 +108,14 @@ export function ChangeLocalAndDate({
                             className='flex items-center gap-2 text-left w-[300px]'>
                             <Calendar className="size-5 text-zinc-400" />
                             <span className=" text-lg text-zinc-400 w-40 flex-1">
-                            {displayedDate || " Quando? "}
+                                {displayedDate || " Quando? "}
                             </span>
                         </button>
                     </div>
 
-                
-
-
-
+                    {noParams && <p className="text-sm font-semibold text-red-500">Preencha todos os campos</p>}
+                    {alreadyExistsTrip && <p className="text-sm font-semibold text-red-500">Já existe uma viagem com essas informações</p>}
+                    {errorInRequest && <p className="text-sm font-semibold text-red-500">Erro ao tentar alterar a viagem</p>}
                     <Button variant="primary" size="full">
                         Confirmar alteração
                     </Button>
@@ -101,24 +123,24 @@ export function ChangeLocalAndDate({
                 </form>
 
                 {isDatePickerOpen && (
-                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-                            <div className=" rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
+                    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+                        <div className=" rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
 
-                                <div className="space-y-2">
+                            <div className="space-y-2">
 
-                                    <div className="flex items-center justify-between">
-                                        <h2 className="text-lg font-semibold">Selecione a data</h2>
-                                        <button type="button" onClick={closeDatePicker}>
-                                            <X className="size-5 text-zinc-400" />
-                                        </button>
-                                    </div>
-
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-lg font-semibold">Selecione a data</h2>
+                                    <button type="button" onClick={closeDatePicker}>
+                                        <X className="size-5 text-zinc-400" />
+                                    </button>
                                 </div>
 
-                                <DayPicker mode="range"  selected={eventStartAndEndDates} onSelect={setEventStartAndEndDates}/>
                             </div>
+
+                            <DayPicker mode="range" selected={eventStartAndEndDates} onSelect={setEventStartAndEndDates} />
                         </div>
-                    )}
+                    </div>
+                )}
             </div>
         </div>
     )
